@@ -3,58 +3,41 @@ let searchTerms = [    "interior design", "wedding planning", "small business id
   
   // Function to extract potential search terms from a webpage
   async function extractSearchTermsFromPage(tabId) {
-    try {
-      const results = await chrome.scripting.executeScript({
-        target: {tabId: tabId},
-        function: () => {
-          // Function to get random items from an array
-          function getRandomItems(arr, num) {
-            const shuffled = [...arr].sort(() => 0.5 - Math.random());
-            return shuffled.slice(0, num);
-          }
-          
-          // Get all headings and paragraphs
-          const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4'));
-          const paragraphs = Array.from(document.querySelectorAll('p')).slice(0, 5); // Just take first 5 paragraphs
-          
-          // Extract text and split into words
-          const headingText = headings.map(h => h.textContent.trim()).join(' ');
-          const paragraphText = paragraphs.map(p => p.textContent.trim()).join(' ');
-          
-          const allText = headingText + ' ' + paragraphText;
-          
-          // Extract meaningful phrases (3-5 words)
-          const phrases = [];
-          const words = allText.split(/\s+/);
-          
-          for (let i = 0; i < words.length - 2; i++) {
-            // Skip common words and short words as starting points
-            if (words[i].length < 4) continue;
-            
-            // Create phrases of different lengths
-            const phrase3 = words.slice(i, i + 3).join(' ');
-            if (phrase3.length > 10 && phrase3.length < 40) phrases.push(phrase3);
-            
-            if (i < words.length - 4) {
-              const phrase5 = words.slice(i, i + 5).join(' ');
-              if (phrase5.length > 15 && phrase5.length < 60) phrases.push(phrase5);
+    return new Promise((resolve) => {
+      chrome.tabs.executeScript(tabId, {
+        code: `
+          (function() {
+            function getRandomItems(arr, num) {
+              const shuffled = [...arr].sort(() => 0.5 - Math.random());
+              return shuffled.slice(0, num);
             }
-          }
-          
-          // Return random selection of found phrases
-          return getRandomItems(phrases, 10);
+            const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4'));
+            const paragraphs = Array.from(document.querySelectorAll('p')).slice(0, 5);
+            const headingText = headings.map(h => h.textContent.trim()).join(' ');
+            const paragraphText = paragraphs.map(p => p.textContent.trim()).join(' ');
+            const allText = headingText + ' ' + paragraphText;
+            const phrases = [];
+            const words = allText.split(/\\s+/);
+            for (let i = 0; i < words.length - 2; i++) {
+              if (words[i].length < 4) continue;
+              const phrase3 = words.slice(i, i + 3).join(' ');
+              if (phrase3.length > 10 && phrase3.length < 40) phrases.push(phrase3);
+              if (i < words.length - 4) {
+                const phrase5 = words.slice(i, i + 5).join(' ');
+                if (phrase5.length > 15 && phrase5.length < 60) phrases.push(phrase5);
+              }
+            }
+            return getRandomItems(phrases, 10);
+          })();
+        `
+      }, function(results) {
+        if (results && results[0] && results[0].length > 0) {
+          resolve(results[0]);
+        } else {
+          resolve([]);
         }
       });
-      
-      // Extract phrases from script execution result
-      if (results && results.length > 0 && results[0].result && results[0].result.length > 0) {
-        return results[0].result;
-      }
-      return [];
-    } catch (error) {
-      console.error("Error extracting terms:", error);
-      return [];
-    }
+    });
   }
   
   // Function to shuffle array (Fisher-Yates algorithm)
@@ -73,115 +56,79 @@ let searchTerms = [    "interior design", "wedding planning", "small business id
       const tab = await chrome.tabs.get(tabId);
       if (!tab.url.includes('bing.com')) {
         await chrome.tabs.update(tabId, { url: 'https://www.bing.com/' });
-        
-        // Wait for Bing to load
         await new Promise(resolve => setTimeout(resolve, 2000));
       }
-      
+
       // Now inject script to use the search bar
-      await chrome.scripting.executeScript({
-        target: {tabId: tabId},
-        func: (term) => {
-          return new Promise((resolve, reject) => {
-            try {
-              // Function to find the search input field - handles multiple possible selectors
-              function findSearchInput() {
-                // Try different possible selectors for Bing search box
-                const selectors = [
-                  '#sb_form_q', // Standard Bing search input
-                  'input[name="q"]', // General query input
-                  'input[type="search"]', // Any search input
-                  'input.b_searchbox', // Bing search box class
-                  '#searchbox' // Another possible ID
-                ];
-                
-                for (const selector of selectors) {
-                  const element = document.querySelector(selector);
-                  if (element) return element;
-                }
-                
-                return null;
-              }
-              
-              // Find the search input
-              const searchInput = findSearchInput();
-              
-              if (!searchInput) {
-                throw new Error("Could not find search input field");
-              }
-              
-              // Clear any existing value
-              searchInput.value = '';
-              
-              // Focus the search input
-              searchInput.focus();
-              
-              // Insert the search term
-              searchInput.value = term;
-              
-              // Create and dispatch events to make it look natural
-              // Input event
-              searchInput.dispatchEvent(new Event('input', { bubbles: true }));
-              
-              // Small delay to simulate typing
-              setTimeout(() => {
-                // Find the search button
-                const searchButton = document.querySelector('#search_icon') || 
-                                    document.querySelector('button[type="submit"]') ||
-                                    document.querySelector('#sb_form_go');
-                
-                if (searchButton) {
-                  // Click the search button
-                  searchButton.click();
-                  resolve(true);
-                } else {
-                  // If no button found, try submitting the form
-                  const form = document.querySelector('#sb_form') || document.querySelector('form');
-                  if (form) {
-                    form.submit();
-                    resolve(true);
-                  } else {
-                    // Last resort - simulate Enter key on the input
-                    searchInput.dispatchEvent(new KeyboardEvent('keydown', {
-                      key: 'Enter',
-                      code: 'Enter',
-                      keyCode: 13,
-                      which: 13,
-                      bubbles: true
-                    }));
-                    resolve(true);
+      await new Promise((resolve, reject) => {
+        chrome.tabs.executeScript(tabId, {
+          code: `
+            (function(term) {
+              try {
+                function findSearchInput() {
+                  const selectors = [
+                    '#sb_form_q',
+                    'input[name="q"]',
+                    'input[type="search"]',
+                    'input.b_searchbox',
+                    '#searchbox'
+                  ];
+                  for (const selector of selectors) {
+                    const element = document.querySelector(selector);
+                    if (element) return element;
                   }
+                  return null;
                 }
-              }, 500);
-            } catch (err) {
-              reject(err);
-            }
-          });
-        },
-        args: [searchTerm]
+                const searchInput = findSearchInput();
+                if (!searchInput) throw new Error("Could not find search input field");
+                searchInput.value = '';
+                searchInput.focus();
+                searchInput.value = term;
+                searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+                setTimeout(() => {
+                  const searchButton = document.querySelector('#search_icon') ||
+                                       document.querySelector('button[type="submit"]') ||
+                                       document.querySelector('#sb_form_go');
+                  if (searchButton) {
+                    searchButton.click();
+                  } else {
+                    const form = document.querySelector('#sb_form') || document.querySelector('form');
+                    if (form) {
+                      form.submit();
+                    } else {
+                      searchInput.dispatchEvent(new KeyboardEvent('keydown', {
+                        key: 'Enter',
+                        code: 'Enter',
+                        keyCode: 13,
+                        which: 13,
+                        bubbles: true
+                      }));
+                    }
+                  }
+                }, 500);
+              } catch (err) {}
+            })(${JSON.stringify(searchTerm)});
+          `
+        }, () => resolve());
       });
-      
+
       // Send progress update
       chrome.runtime.sendMessage({
         type: 'progress',
         count: count
       });
-      
+
       // Wait for page to load before extracting new terms
       if (count < 30) {
         return new Promise(resolve => {
           setTimeout(async () => {
-            // Extract new terms from the search results page
             const newTerms = await extractSearchTermsFromPage(tabId);
-            
-            // Add new terms to our pool if we found any
             if (newTerms.length > 0) {
               searchTerms = [...searchTerms, ...newTerms];
               console.log("Added new search terms:", newTerms);
             }
-            
             resolve();
-          }, 5000); // Give page 5 seconds to load before extracting
+          }, 5000);
         });
       }
     } catch (error) {
@@ -196,42 +143,50 @@ let searchTerms = [    "interior design", "wedding planning", "small business id
   // Function to click extra rewards on rewards.bing.com and call callback when done
   async function clickExtraRewards(tabId, callback) {
     try {
-      const [{ result: rewardCount }] = await chrome.scripting.executeScript({
-        target: { tabId: tabId },
-        func: () => {
-          const rewardLinks = document.querySelectorAll('#more-activities a.ds-card-sec');
-          let i = 0;
-          function clickNextReward() {
-            if (i < rewardLinks.length) {
-              rewardLinks[i].click();
-              i++;
-              setTimeout(clickNextReward, 6000); // 6 seconds delay
+      chrome.tabs.executeScript(tabId, {
+        code: `
+          (function() {
+            const rewardLinks = document.querySelectorAll('#more-activities a.ds-card-sec');
+            let i = 0;
+            function clickNextReward() {
+              if (i < rewardLinks.length) {
+                rewardLinks[i].click();
+                i++;
+                setTimeout(clickNextReward, 6000);
+              }
             }
-          }
-          clickNextReward();
-          return rewardLinks.length;
-        }
+            clickNextReward();
+            return rewardLinks.length;
+          })();
+        `
+      }, function(results) {
+        const rewardCount = results && results[0] ? results[0] : 0;
+        const totalDelay = (rewardCount || 0) * 6000 + 2000;
+        setTimeout(callback, totalDelay);
       });
-      // Wait for all rewards to finish (6s per reward)
-      const totalDelay = (rewardCount || 0) * 6000 + 2000;
-      setTimeout(callback, totalDelay);
     } catch (error) {
       console.error("Error clicking extra rewards:", error);
       callback();
     }
   }
   
-  // Modified function: Visit rewards.bing.com, click rewards, then start searches
+  // Modified function: Visit rewards.bing.com, click rewards, then start searches on Bing
   async function runRewardsThenSearches() {
     try {
-      const tab = await chrome.tabs.create({ url: "https://rewards.bing.com/", active: true });
-      // Wait for page to load
-      setTimeout(() => {
-        clickExtraRewards(tab.id, () => {
-          // After rewards, start searches in the same tab
-          startRandomSearches(tab.id);
-        });
-      }, 4000); // Wait 4 seconds for the page to load
+      // Open rewards.bing.com
+      chrome.tabs.create({ url: "https://rewards.bing.com/", active: true }, function(tab) {
+        // Wait for page to load
+        setTimeout(() => {
+          clickExtraRewards(tab.id, () => {
+            // After rewards, go to Bing and start searches
+            chrome.tabs.update(tab.id, { url: "https://www.bing.com/" }, function(updatedTab) {
+              setTimeout(() => {
+                startRandomSearches(updatedTab.id);
+              }, 3000); // Wait 3 seconds for Bing to load
+            });
+          });
+        }, 4000); // Wait 4 seconds for Rewards page to load
+      });
     } catch (error) {
       console.error("Error visiting rewards.bing.com:", error);
     }
