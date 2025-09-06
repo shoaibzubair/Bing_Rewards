@@ -1,14 +1,13 @@
 {
-    "manifest_version": 3,
+    "manifest_version": 2,
     "name": "Bing Search Bar Extension",
     "version": "1.0",
     "description": "Performs searches using the Bing search bar",
-    "permissions": ["scripting", "tabs", "storage", "alarms"],
-    "host_permissions": ["*://*.bing.com/*"],
+    "permissions": ["tabs", "storage", "alarms", "https://*.bing.com/*"],
     "background": {
-      "service_worker": "background.js"
+      "scripts": ["background.js"]
     },
-    "action": {
+    "browser_action": {
       "default_popup": "popup.html",
       "default_icon": {
         "16": "icons/icon16.png",
