@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bing Search Bar Extension</title>
+  <style>
+    body {
+      width: 320px;
+      padding: 10px;
+      font-family: Arial, sans-serif;
+    }
+    button {
+      width: 100%;
+      padding: 8px;
+      margin-top: 10px;
+      background-color: #0078D7;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005A9E;
+    }
+    #status, #scheduleStatus {
+      margin-top: 15px;
+      text-align: center;
+    }
+    #counter {
+      font-weight: bold;
+    }
+    .switch-container {
+      display: flex;
+      align-items: center;
+      margin-top: 15px;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+      margin-right: 10px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #0078D7;
+    }
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+    .time-input {
+      margin-top: 15px;
+    }
+    .time-input label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    .time-input input {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <h2>Bing Search Bar Extension</h2>
+  <p>This extension will perform 30 random searches using the Bing search bar with 30-second intervals.</p>
+  
+  <div class="time-input">
+    <label for="scheduleTime">Schedule Time (24-hour format):</label>
+    <input type="time" id="scheduleTime" value="00:15">
+  </div>
+  
+  <div class="switch-container">
+    <label class="switch">
+      <input type="checkbox" id="scheduleToggle">
+      <span class="slider"></span>
+    </label>
+    <span>Enable daily scheduled searches</span>
+  </div>
+  <div id="scheduleStatus"></div>
+  
+  <button id="startSearching">Run Searches Now</button>
+  <div id="status"></div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>

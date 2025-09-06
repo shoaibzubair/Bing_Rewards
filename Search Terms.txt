@@ -1,0 +1,31 @@
+[
+    "weather forecast", "news today", "recipe ideas",
+    "travel destinations", "movie reviews", "technology trends",
+    "health tips", "gardening advice", "home decor",
+    "fitness routines", "book recommendations", "music charts",
+    "sports news", "language learning", "programming tutorials",
+    "art galleries", "photography tips", "car reviews",
+    "financial advice", "career development", "science discoveries",
+    "history facts", "video game reviews", "DIY projects",
+    "fashion trends", "pet care", "meditation techniques",
+    "astronomy facts", "cooking tips", "educational resources",
+    "blockchain applications", "new smartphone releases", "electric vehicles",
+    "artificial intelligence", "renewable energy", "quantum computing",
+    "space exploration", "vaccine development", "mental health resources",
+    "climate change solutions", "cybersecurity tips", "virtual reality",
+    "augmented reality", "smart home devices", "robotics innovations",
+    "3D printing projects", "cryptocurrency trends", "sustainable living",
+    "organic farming", "alternative medicine", "mindfulness practices","fitness routines", "travel destinations", "movie recommendations", "home automation", "language translation tools", "gardening tips", "investment strategies", "productivity hacks", "healthcare innovations", "ancient civilizations", "mobile app reviews", "home improvement ideas", "seasonal recipes", "animal behavior", "stress management techniques", "astrophysics breakthroughs", "baking secrets", "e-learning platforms", "coding challenges", "wearable technology", "hybrid vehicles", "natural language processing", "solar power solutions", "deep learning", "mars exploration", "genetic research", "therapy techniques", "global warming effects", "data protection strategies", "mixed reality", "digital art tools", "voice assistants", "medical robotics", "biotechnology research", "NFT trends", "zero waste lifestyle", "permaculture gardening", "herbal remedies", "gratitude practices"
+  ]
+
+
+For Shoaibzubairhld@gmail.com
+[
+    "interior design", "wedding planning", "small business ideas", "parenting tips", "retirement planning", "online courses", "digital marketing", "podcast recommendations", "yoga poses", "wine tasting", "budget travel", "freelancing opportunities", "sustainable fashion", "plant-based recipes", "graphic design", "social media trends", "public speaking", "time management", "creative writing", "outdoor activities", "antique collecting", "skincare routines", "jewelry making", "woodworking projects", "beard grooming", "nail art", "hairstyle trends", "makeup tutorials", "board game reviews", "puzzle solutions", "craft beer", "coffee brewing", "tea ceremonies", "cheese making", "bread baking", "fermentation", "urban planning", "architecture styles", "real estate trends", "rental property", "insurance options", "tax strategies", "scholarship opportunities", "study abroad", "networking events", "job interviews", "resume writing", "salary negotiation", "workplace productivity", "team building", "leadership skills", "conflict resolution", "customer service", "sales techniques", "marketing automation", "content creation", "SEO strategies", "web development", "database design", "cloud computing", "machine learning", "data visualization", "statistical analysis", "research methods", "academic writing", "scientific publications", "patent applications", "innovation management", "startup funding", "venture capital", "crowdfunding", "business partnerships", "supply chain", "logistics management", "quality control", "project management", "risk assessment", "compliance regulations", "environmental law", "intellectual property", "contract negotiation", "dispute resolution", "mediation services", "legal research", "court procedures", "immigration law", "family law", "estate planning", "elder care", "disability resources", "addiction recovery", "grief counseling", "relationship advice", "dating tips", "marriage counseling", "child development", "educational psychology", "learning disabilities", "special needs support", "autism resources", "ADHD management", "anxiety treatment", "depression help"
+]
+
+For shibdyem@gmail.com
+
+[
+    "drone photography", "mushroom foraging", "beekeeping basics", "soap making", "candle making", "pottery techniques", "leather crafting", "glass blowing", "metal working", "embroidery patterns", "quilting designs", "knitting tutorials", "crochet projects", "scrapbooking ideas", "calligraphy lessons", "origami instructions", "magic tricks", "card games", "chess strategies", "poker tips", "casino games", "lottery numbers", "sports betting", "fantasy football", "marathon training", "swimming techniques", "cycling routes", "hiking trails", "camping gear", "fishing spots", "hunting licenses", "bird watching", "wildlife photography", "marine biology", "geology formations", "meteorology basics", "earthquake predictions", "volcano monitoring", "hurricane tracking", "flood warnings", "drought conditions", "air quality index", "pollution levels", "water conservation", "energy efficiency", "green building", "passive house", "tiny homes", "mobile homes", "RV living", "boat maintenance", "sailing lessons", "scuba diving", "snorkeling spots", "surfing conditions", "skiing weather", "snowboarding gear", "ice skating", "roller skating", "skateboarding tricks", "BMX stunts", "motorcycle maintenance", "classic cars", "vintage motorcycles", "antique restoration", "coin collecting", "stamp collecting", "comic book values", "trading cards", "action figures", "model trains", "RC planes", "drone racing", "eSports tournaments", "streaming setup", "content monetization", "influencer marketing", "affiliate programs", "dropshipping", "print on demand", "Amazon FBA", "Etsy selling", "eBay auctions", "garage sales", "thrift shopping", "coupon codes", "cashback rewards", "loyalty programs", "credit scores", "debt consolidation", "mortgage rates", "refinancing options", "home equity", "property taxes", "HOA fees", "moving services", "storage solutions", "pest control", "lawn care", "pool maintenance", "HVAC repair", "plumbing fixes", "electrical work", "roofing materials", "siding options", "window replacement", "door installation"
+]

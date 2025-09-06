@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bing Search Runner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 16px;
+            background-color: #f3f3f3;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #0078D7;
+            margin-top: 0;
+        }
+        .status-panel {
+            background-color: #f9f9f9;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #0078D7;
+        }
+        button {
+            background-color: #0078D7;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:disabled {
+            background-color: #cccccc;
+        }
+        button.stop {
+            background-color: #d74c4c;
+        }
+        button.pause {
+            background-color: #e69b00;
+        }
+        .progress-bar {
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background-color: #0078D7;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .search-list {
+            height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-top: 15px;
+            border-radius: 4px;
+        }
+        .search-item {
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        .search-item.completed {
+            color: #666;
+            text-decoration: line-through;
+        }
+        .search-history {
+            margin-top: 20px;
+        }
+        .settings {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 6px;
+        }
+        .settings label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        .settings input[type="number"] {
+            width: 70px;
+            padding: 5px;
+        }
+        .interval-display {
+            font-weight: bold;
+        }
+        .timer {
+            font-size: 18px;
+            text-align: center;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bing Search Runner</h1>
+        <p>Run automated Bing searches from your Android device</p>
+        
+        <div class="settings">
+            <h3>Settings</h3>
+            <label>
+                Number of searches: 
+                <input type="number" id="searchCount" min="1" max="50" value="30">
+            </label>
+            <label>
+                Interval between searches: 
+                <input type="number" id="searchInterval" min="5" max="120" value="30"> seconds
+            </label>
+        </div>
+        
+        <div class="status-panel">
+            <div id="statusText">Ready to start searches</div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+            <div id="progressText">0/30 searches completed</div>
+            <div class="timer" id="timer">Next search in: --</div>
+        </div>
+        
+        <div>
+            <button id="startButton">Start Searches</button>
+            <button id="pauseButton" class="pause" disabled>Pause</button>
+            <button id="stopButton" class="stop" disabled>Stop</button>
+        </div>
+        
+        <div class="search-history">
+            <h3>Search Progress</h3>
+            <div class="search-list" id="searchList"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Initial search terms
+        const baseSearchTerms = [
+            "weather forecast", "news today", "recipe ideas",
+            "travel destinations", "movie reviews", "technology trends",
+            "health tips", "gardening advice", "home decor",
+            "fitness routines", "book recommendations", "music charts",
+            "sports news", "language learning", "programming tutorials",
+            "art galleries", "photography tips", "car reviews",
+            "financial advice", "career development", "science discoveries",
+            "history facts", "video game reviews", "DIY projects",
+            "fashion trends", "pet care", "meditation techniques",
+            "astronomy facts", "cooking tips", "educational resources",
+            "blockchain applications", "new smartphone releases", "electric vehicles",
+            "artificial intelligence", "renewable energy", "quantum computing",
+            "space exploration", "vaccine development", "mental health resources",
+            "climate change solutions", "cybersecurity tips", "virtual reality",
+            "augmented reality", "smart home devices", "robotics innovations",
+            "3D printing projects", "cryptocurrency trends", "sustainable living",
+            "organic farming", "alternative medicine", "mindfulness practices"
+        ];
+        
+        // UI Elements
+        const startButton = document.getElementById('startButton');
+        const pauseButton = document.getElementById('pauseButton');
+        const stopButton = document.getElementById('stopButton');
+        const statusText = document.getElementById('statusText');
+        const progressText = document.getElementById('progressText');
+        const progressBar = document.getElementById('progressBar');
+        const searchList = document.getElementById('searchList');
+        const timerDisplay = document.getElementById('timer');
+        const searchCountInput = document.getElementById('searchCount');
+        const searchIntervalInput = document.getElementById('searchInterval');
+        
+        // State variables
+        let searchTerms = [];
+        let currentSearchIndex = 0;
+        let isRunning = false;
+        let isPaused = false;
+        let timeoutId = null;
+        let completedSearches = 0;
+        let totalSearches = 30;
+        let intervalSeconds = 30;
+        let countdownInterval = null;
+        let secondsRemaining = 0;
+        
+        // Shuffle array function
+        function shuffleArray(array) {
+            const result = [...array];
+            for (let i = result.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [result[i], result[j]] = [result[j], result[i]];
+            }
+            return result;
+        }
+        
+        // Update progress UI
+        function updateProgress() {
+            const percentage = (completedSearches / totalSearches) * 100;
+            progressBar.style.width = `${percentage}%`;
+            progressText.textContent = `${completedSearches}/${totalSearches} searches completed`;
+        }
+        
+        // Update search list UI
+        function updateSearchList() {
+            searchList.innerHTML = '';
+            
+            searchTerms.forEach((term, index) => {
+                const item = document.createElement('div');
+                item.className = 'search-item';
+                item.textContent = `${index + 1}. ${term}`;
+                
+                if (index < completedSearches) {
+                    item.classList.add('completed');
+                }
+                
+                searchList.appendChild(item);
+            });
+        }
+        
+        // Perform a single search
+        function performSearch(term) {
+            // Update UI
+            statusText.textContent = `Searching: "${term}"`;
+            
+            // Open Bing search in a new window/tab
+            window.open(`https://www.bing.com/search?q=${encodeURIComponent(term)}`, '_blank');
+            
+            // Update counters
+            completedSearches++;
+            updateProgress();
+            updateSearchList();
+            
+            // Check if we're done
+            if (completedSearches >= totalSearches) {
+                endSearches(true);
+                statusText.textContent = 'All searches completed!';
+                return;
+            }
+            
+            // Set up next search if still running
+            if (isRunning && !isPaused) {
+                startCountdown();
+            }
+        }
+        
+        // Start countdown timer for next search
+        function startCountdown() {
+            secondsRemaining = intervalSeconds;
+            updateTimerDisplay();
+            
+            clearInterval(countdownInterval);
+            countdownInterval = setInterval(() => {
+                secondsRemaining--;
+                updateTimerDisplay();
+                
+                if (secondsRemaining <= 0) {
+                    clearInterval(countdownInterval);
+                    
+                    // Perform next search
+                    if (currentSearchIndex < searchTerms.length) {
+                        performSearch(searchTerms[currentSearchIndex]);
+                        currentSearchIndex++;
+                    }
+                }
+            }, 1000);
+        }
+        
+        // Update timer display
+        function updateTimerDisplay() {
+            if (isPaused) {
+                timerDisplay.textContent = `PAUSED - ${secondsRemaining} seconds remaining`;
+            } else {
+                timerDisplay.textContent = `Next search in: ${secondsRemaining} seconds`;
+            }
+        }
+        
+        // Start searches
+        function startSearches() {
+            // Get settings
+            totalSearches = parseInt(searchCountInput.value, 10);
+            intervalSeconds = parseInt(searchIntervalInput.value, 10);
+            
+            // Validate settings
+            if (isNaN(totalSearches) || totalSearches < 1 || totalSearches > 50) {
+                alert('Please enter a valid number of searches (1-50)');
+                return;
+            }
+            
+            if (isNaN(intervalSeconds) || intervalSeconds < 5 || intervalSeconds > 120) {
+                alert('Please enter a valid interval (5-120 seconds)');
+                return;
+            }
+            
+            // Reset state
+            isRunning = true;
+            isPaused = false;
+            completedSearches = 0;
+            currentSearchIndex = 0;
+            
+            // Prepare search terms
+            searchTerms = shuffleArray(baseSearchTerms).slice(0, totalSearches);
+            
+            // Update UI
+            startButton.disabled = true;
+            pauseButton.disabled = false;
+            stopButton.disabled = false;
+            statusText.textContent = 'Starting searches...';
+            updateProgress();
+            updateSearchList();
+            
+            // Start first search after a short delay
+            setTimeout(() => {
+                if (isRunning) {
+                    performSearch(searchTerms[currentSearchIndex]);
+                    currentSearchIndex++;
+                }
+            }, 1000);
+        }
+        
+        // Pause/resume searches
+        function togglePause() {
+            isPaused = !isPaused;
+            
+            if (isPaused) {
+                pauseButton.textContent = 'Resume';
+                statusText.textContent = 'Searches paused';
+                clearInterval(countdownInterval);
+            } else {
+                pauseButton.textContent = 'Pause';
+                statusText.textContent = 'Searches resumed';
+                startCountdown();
+            }
+            
+            updateTimerDisplay();
+        }
+        
+        // End searches
+        function endSearches(completed = false) {
+            isRunning = false;
+            isPaused = false;
+            
+            // Clear any pending actions
+            clearTimeout(timeoutId);
+            clearInterval(countdownInterval);
+            
+            // Update UI
+            startButton.disabled = false;
+            pauseButton.disabled = true;
+            stopButton.disabled = true;
+            pauseButton.textContent = 'Pause';
+            
+            if (!completed) {
+                statusText.textContent = 'Searches stopped';
+            }
+        }
+        
+        // Set up event listeners
+        startButton.addEventListener('click', startSearches);
+        pauseButton.addEventListener('click', togglePause);
+        stopButton.addEventListener('click', () => endSearches());
+        
+        // Initial UI setup
+        updateProgress();
+    </script>
+</body>
+</html>
