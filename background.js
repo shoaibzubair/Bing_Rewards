@@ -314,3 +314,13 @@ let searchTerms = [    "interior design", "wedding planning", "small business id
       }
     });
   });
+  
+  chrome.commands.onCommand.addListener(function(command) {
+    if (command === "run-searches") {
+      runRewardsThenSearches();
+    }
+  });
+  
+  chrome.browserAction.onClicked.addListener(function(tab) {
+    runRewardsThenSearches();
+  });
